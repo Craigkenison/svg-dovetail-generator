@@ -8,16 +8,19 @@
         #svg-container {
             margin-top: 20px;
         }
+        svg {
+            border: 1px solid black;
+        }
     </style>
 </head>
 <body>
     <h1>SVG Dovetail Generator</h1>
     <form id="dimensionForm">
-        <label for="width">Width:</label>
-        <input type="number" id="width" name="width" required>
+        <label for="width">Width (inches):</label>
+        <input type="number" id="width" name="width" step="0.01" required>
         <br>
-        <label for="height">Height:</label>
-        <input type="number" id="height" name="height" required>
+        <label for="height">Height (inches):</label>
+        <input type="number" id="height" name="height" step="0.01" required>
         <br>
         <label for="numTails">Number of Tails:</label>
         <input type="number" id="numTails" name="numTails" required>
@@ -28,39 +31,48 @@
 
     <script>
         function generateSVG() {
-            const width = parseFloat(document.getElementById('width').value);
-            const height = parseFloat(document.getElementById('height').value);
+            const width = parseFloat(document.getElementById('width').value) * 96; // Convert inches to pixels (1 inch = 96 pixels)
+            const height = parseFloat(document.getElementById('height').value) * 96; // Convert inches to pixels (1 inch = 96 pixels)
             const numTails = parseInt(document.getElementById('numTails').value);
+
+            const scale = 0.25; // 1/4 scale for preview
+            const scaledWidth = width * scale;
+            const scaledHeight = height * scale;
 
             const svgContainer = document.getElementById('svg-container');
             svgContainer.innerHTML = '';
 
             const svgNS = "http://www.w3.org/2000/svg";
             const svg = document.createElementNS(svgNS, "svg");
-            svg.setAttribute("width", width);
-            svg.setAttribute("height", height);
+            svg.setAttribute("width", scaledWidth);
+            svg.setAttribute("height", scaledHeight);
 
             const tailWidth = width / numTails;
-            const halfTailHeight = height / 2;
+            const pinWidth = tailWidth * 0.5; // Assume pin width is half of tail width
+            const socketWidth = tailWidth * 0.5; // Assume socket width is half of tail width
 
             for (let i = 0; i < numTails; i++) {
                 const path = document.createElementNS(svgNS, "path");
 
                 // Coordinates for the dovetail path
-                const x1 = i * tailWidth;
-                const x2 = x1 + tailWidth / 2;
-                const x3 = (i + 1) * tailWidth;
+                const x1 = i * tailWidth * scale;
+                const x2 = (i * tailWidth + pinWidth / 2) * scale;
+                const x3 = ((i + 1) * tailWidth - pinWidth / 2) * scale;
+                const x4 = (i + 1) * tailWidth * scale;
                 const y1 = 0;
-                const y2 = halfTailHeight;
-                const y3 = height;
+                const y2 = height * scale;
+                const y3 = (height - socketWidth) * scale;
+                const y4 = socketWidth * scale;
 
                 const d = `
                     M ${x1} ${y1}
-                    L ${x2} ${y2}
-                    L ${x3} ${y1}
+                    L ${x2} ${y3}
                     L ${x3} ${y3}
-                    L ${x2} ${y2 + halfTailHeight}
-                    L ${x1} ${y3}
+                    L ${x4} ${y1}
+                    L ${x4} ${y2}
+                    L ${x3} ${y4}
+                    L ${x2} ${y4}
+                    L ${x1} ${y2}
                     Z
                 `;
 
