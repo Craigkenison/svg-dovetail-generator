@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Dovetail Generator</title>
+    <style>
+        #svg-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>SVG Dovetail Generator</h1>
+    <form id="dimensionForm">
+        <label for="width">Width:</label>
+        <input type="number" id="width" name="width" required>
+        <br>
+        <label for="height">Height:</label>
+        <input type="number" id="height" name="height" required>
+        <br>
+        <label for="numTails">Number of Tails:</label>
+        <input type="number" id="numTails" name="numTails" required>
+        <br>
+        <button type="button" onclick="generateSVG()">Generate SVG</button>
+    </form>
+    <div id="svg-container"></div>
+
+    <script>
+        function generateSVG() {
+            const width = parseFloat(document.getElementById('width').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const numTails = parseInt(document.getElementById('numTails').value);
+
+            const svgContainer = document.getElementById('svg-container');
+            svgContainer.innerHTML = '';
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", width);
+            svg.setAttribute("height", height);
+
+            const tailWidth = width / numTails;
+            const halfTailHeight = height / 2;
+
+            for (let i = 0; i < numTails; i++) {
+                const path = document.createElementNS(svgNS, "path");
+
+                // Coordinates for the dovetail path
+                const x1 = i * tailWidth;
+                const x2 = x1 + tailWidth / 2;
+                const x3 = (i + 1) * tailWidth;
+                const y1 = 0;
+                const y2 = halfTailHeight;
+                const y3 = height;
+
+                const d = `
+                    M ${x1} ${y1}
+                    L ${x2} ${y2}
+                    L ${x3} ${y1}
+                    L ${x3} ${y3}
+                    L ${x2} ${y2 + halfTailHeight}
+                    L ${x1} ${y3}
+                    Z
+                `;
+
+                path.setAttribute("d", d);
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", "black");
+
+                svg.appendChild(path);
+            }
+
+            svgContainer.appendChild(svg);
+        }
+    </script>
+</body>
+</html>
