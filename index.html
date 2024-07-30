@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -49,8 +48,73 @@
             const height = parseFloat(document.getElementById('height').value) * 96; // Convert inches to pixels (1 inch = 96 pixels)
             const numTails = parseInt(document.getElementById('numTails').value);
 
-            const scale = 0.5; // Increase scale for better preview
+            const scale = 1; // Set scale to 1 for accurate preview
             const scaledWidth = width * scale;
             const scaledHeight = height * scale;
 
-            const svgContainer = doc
+            const svgContainer = document.getElementById('svg-container');
+            svgContainer.innerHTML = '';
+
+            const svgNS = "http://www.w3.org/2000/svg";
+            const svg = document.createElementNS(svgNS, "svg");
+            svg.setAttribute("width", scaledWidth);
+            svg.setAttribute("height", scaledHeight);
+            svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+            const tailWidth = width / numTails;
+            const pinWidth = tailWidth / 2;
+            const angle = 7 * (Math.PI / 180); // Convert 7 degrees to radians
+            const deltaY = Math.tan(angle) * (tailWidth / 2);
+
+            for (let i = 0; i < numTails; i++) {
+                const path = document.createElementNS(svgNS, "path");
+
+                // Coordinates for the dovetail path
+                const x1 = i * tailWidth;
+                const x2 = i * tailWidth + tailWidth / 2;
+                const x3 = i * tailWidth + tailWidth;
+                const y1 = 0;
+                const y2 = height;
+                const y3 = height - deltaY;
+                const y4 = deltaY;
+
+                const d = `
+                    M ${x1} ${y1}
+                    L ${x2} ${y4}
+                    L ${x3} ${y1}
+                    L ${x3} ${y2}
+                    L ${x2} ${y3}
+                    L ${x1} ${y2}
+                    Z
+                `;
+
+                path.setAttribute("d", d);
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", "black");
+
+                svg.appendChild(path);
+            }
+
+            svgContainer.appendChild(svg);
+        }
+
+        function downloadSVG() {
+            const svgContainer = document.getElementById('svg-container');
+            const svg = svgContainer.querySelector('svg');
+
+            const serializer = new XMLSerializer();
+            const source = serializer.serializeToString(svg);
+
+            const svgBlob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+            const url = URL.createObjectURL(svgBlob);
+
+            const downloadLink = document.createElement("a");
+            downloadLink.href = url;
+            downloadLink.download = "dovetail.svg";
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    </script>
+</body>
+</html>
