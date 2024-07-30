@@ -48,31 +48,33 @@
             svg.setAttribute("height", scaledHeight);
 
             const tailWidth = width / numTails;
-            const pinWidth = tailWidth * 0.5; // Assume pin width is half of tail width
-            const socketWidth = tailWidth * 0.5; // Assume socket width is half of tail width
+            const pinWidth = tailWidth / 2;
+            const halfPinWidth = pinWidth / 2;
+            const tailHeight = height / 2;
+            const angle = Math.atan(tailHeight / halfPinWidth);
+            const deltaX = tailHeight / Math.tan(angle);
 
             for (let i = 0; i < numTails; i++) {
                 const path = document.createElementNS(svgNS, "path");
 
                 // Coordinates for the dovetail path
                 const x1 = i * tailWidth * scale;
-                const x2 = (i * tailWidth + pinWidth / 2) * scale;
-                const x3 = ((i + 1) * tailWidth - pinWidth / 2) * scale;
+                const x2 = (i * tailWidth + halfPinWidth) * scale;
+                const x3 = ((i + 1) * tailWidth - halfPinWidth) * scale;
                 const x4 = (i + 1) * tailWidth * scale;
                 const y1 = 0;
-                const y2 = height * scale;
-                const y3 = (height - socketWidth) * scale;
-                const y4 = socketWidth * scale;
+                const y2 = (height - tailHeight) * scale;
+                const y3 = height * scale;
 
                 const d = `
                     M ${x1} ${y1}
-                    L ${x2} ${y3}
-                    L ${x3} ${y3}
+                    L ${x2 - deltaX * scale} ${y2}
+                    L ${x3 + deltaX * scale} ${y2}
                     L ${x4} ${y1}
-                    L ${x4} ${y2}
-                    L ${x3} ${y4}
-                    L ${x2} ${y4}
-                    L ${x1} ${y2}
+                    L ${x4} ${y3}
+                    L ${x3} ${y2}
+                    L ${x2} ${y2}
+                    L ${x1} ${y3}
                     Z
                 `;
 
